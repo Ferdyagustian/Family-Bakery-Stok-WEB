@@ -4,6 +4,7 @@ import { ProductCard } from '@/components/ProductCard'
 import Link from 'next/link'
 import { ChevronLeft, Store, Package, RefreshCw } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { DeleteStoreButton } from '@/components/DeleteStoreButton'
 
 export default async function StoreDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params
@@ -31,6 +32,9 @@ export default async function StoreDetailPage({ params }: { params: Promise<{ id
           <Store className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 flex-shrink-0" />
           <span className="truncate">{store.name}</span>
         </h1>
+        <div className="ml-auto flex-shrink-0">
+          <DeleteStoreButton storeId={store.id} storeName={store.name} />
+        </div>
       </div>
 
       {/* Sub-header with action */}

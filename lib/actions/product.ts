@@ -3,10 +3,13 @@
 import prisma from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 
+import { getSession } from '@/lib/session'
+
 // ─────────────────────────────────────────────
 // CREATE PRODUCT
 // ─────────────────────────────────────────────
 export async function createProduct(formData: FormData) {
+  if (!(await getSession())) return { error: 'Unauthorized' }
   const storeId = formData.get('storeId') as string
   const name = (formData.get('name') as string)?.trim()
   const description = (formData.get('description') as string)?.trim() || null
@@ -45,6 +48,7 @@ export async function recordSale(
   storeId: string,
   quantity: number
 ) {
+  if (!(await getSession())) return { error: 'Unauthorized' }
   // FIX: validasi quantity sebelum masuk DB
   if (!productId || !storeId || quantity <= 0 || !Number.isInteger(quantity)) {
     return { error: 'Data penjualan tidak valid' }
@@ -107,6 +111,7 @@ export async function recordSale(
 // DELETE PRODUCT
 // ─────────────────────────────────────────────
 export async function deleteProduct(productId: string, storeId: string) {
+  if (!(await getSession())) return { error: 'Unauthorized' }
   try {
     // FIX: hapus sales terkait terlebih dahulu dalam satu transaction
     // agar tidak terjadi foreign key constraint error
@@ -129,6 +134,7 @@ export async function bulkRestockProducts(
   restocks: { productId: string; qty: number }[],
   storeId: string
 ) {
+  if (!(await getSession())) return { error: 'Unauthorized' }
   // FIX: qty harus integer positif, bukan sekadar > 0
   const validRestocks = restocks.filter(
     (r) => Number.isInteger(r.qty) && r.qty > 0
