@@ -13,10 +13,10 @@ export function Sidebar({ onClose, showCloseButton }: SidebarProps) {
       {/* Header */}
       <div className="p-5 border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center shadow-md shadow-primary-200">
-            <StoreIcon className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-0.5 shadow-sm border border-gray-100 overflow-hidden">
+            <img src="/logo.png" alt="Family Bakery Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-base font-heading font-bold text-gray-900">Vanilla Bakery</h1>
+          <h1 className="text-base font-heading font-bold text-gray-900">Family Bakery</h1>
         </div>
         {showCloseButton && (
           <button

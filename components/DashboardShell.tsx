@@ -65,10 +65,10 @@ export function DashboardShell({
 
             {/* Logo (mobile only) */}
             <div className="lg:hidden flex items-center space-x-2">
-              <div className="w-7 h-7 rounded-lg bg-primary-600 flex items-center justify-center">
-                <Store className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center p-0.5 shadow-sm border border-gray-100 overflow-hidden">
+                <img src="/logo.png" alt="Family Bakery Logo" className="w-full h-full object-contain" />
               </div>
-              <span className="font-heading font-bold text-gray-900 text-sm">Vanilla Bakery</span>
+              <span className="font-heading font-bold text-gray-900 text-sm">Family Bakery</span>
             </div>
           </div>
 

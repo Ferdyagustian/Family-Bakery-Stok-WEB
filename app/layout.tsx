@@ -6,8 +6,8 @@ const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 const outfit = Outfit({ subsets: ["latin"], variable: '--font-heading' });
 
 export const metadata: Metadata = {
-  title: "Premium Bakery Admin",
-  description: "Stock and sales management for Bakery branches",
+  title: "Family Bakery Admin",
+  description: "Sistem Manajemen Stok dan Penjualan Cabang Family Bakery",
 };
 
 export default function RootLayout({
