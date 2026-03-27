@@ -1,0 +1,106 @@
+'use server'
+
+import prisma from '@/lib/db'
+import { revalidatePath } from 'next/cache'
+
+export async function createProduct(formData: FormData) {
+  const storeId = formData.get('storeId') as string
+  const name = formData.get('name') as string
+  const description = formData.get('description') as string
+  const imageUrl = formData.get('imageUrl') as string
+  const price = parseFloat(formData.get('price') as string)
+  const stockQuantity = parseInt(formData.get('stockQuantity') as string)
+
+  if (!storeId || !name || isNaN(price)) {
+    return { error: 'Data tidak lengkap atau tidak valid' }
+  }
+
+  try {
+    const product = await prisma.product.create({
+      data: { storeId, name, description, imageUrl, price, stockQuantity }
+    })
+    revalidatePath(`/stores/${storeId}`)
+    return { success: true, product }
+  } catch (error) {
+    return { error: 'Gagal menambah produk' }
+  }
+}
+
+export async function recordSale(productId: string, storeId: string, quantity: number) {
+  try {
+    // Get price first (read-only, safe)
+    const product = await prisma.product.findUnique({ where: { id: productId } })
+    if (!product) return { error: 'Produk tidak ditemukan' }
+
+    const totalAmount = product.price * quantity
+    const profitAmount = totalAmount
+
+    // ATOMIC: updateMany with WHERE stockQuantity >= quantity
+    // Database guarantees only ONE update wins if two requests arrive simultaneously
+    await prisma.$transaction(async (tx: typeof prisma) => {
+      const updated = await tx.product.updateMany({
+        where: {
+          id: productId,
+          stockQuantity: { gte: quantity } // ← DB-level check, atomic!
+        },
+        data: { stockQuantity: { decrement: quantity } }
+      })
+
+      if (updated.count === 0) {
+        // Either stock was 0 or another request grabbed the last stock first
+        throw new Error('INSUFFICIENT_STOCK')
+      }
+
+      await tx.sale.create({
+        data: { storeId, productId, quantitySold: quantity, totalAmount, profitAmount }
+      })
+    })
+
+    revalidatePath(`/stores/${storeId}`)
+    revalidatePath('/')
+    return { success: true }
+  } catch (error: any) {
+    if (error?.message === 'INSUFFICIENT_STOCK') {
+      return { error: 'Stok tidak cukup atau sudah habis terjual' }
+    }
+    return { error: 'Gagal mencatat penjualan' }
+  }
+}
+
+export async function deleteProduct(productId: string, storeId: string) {
+  try {
+    await prisma.product.delete({
+      where: { id: productId }
+    })
+    revalidatePath(`/stores/${storeId}`)
+    return { success: true }
+  } catch (error) {
+    return { error: 'Gagal menghapus produk' }
+  }
+}
+
+export async function bulkRestockProducts(
+  restocks: { productId: string; qty: number }[],
+  storeId: string
+) {
+  const validRestocks = restocks.filter(r => r.qty > 0)
+  if (validRestocks.length === 0) {
+    return { error: 'Tidak ada produk yang diisi jumlah restoknya' }
+  }
+
+  try {
+    await prisma.$transaction(
+      validRestocks.map(r =>
+        prisma.product.update({
+          where: { id: r.productId },
+          data: { stockQuantity: { increment: r.qty } }
+        })
+      )
+    )
+    revalidatePath(`/stores/${storeId}`)
+    revalidatePath(`/stores/${storeId}/restock`)
+    return { success: true, count: validRestocks.length }
+  } catch (error) {
+    return { error: 'Gagal menyimpan restok. Silakan coba lagi.' }
+  }
+}

@@ -1,0 +1,53 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Store {
+  id        String    @id @default(cuid())
+  name      String
+  location  String?
+  products  Product[]
+  sales     Sale[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  storeId       String
+  name          String
+  description   String?
+  imageUrl      String?
+  price         Float
+  stockQuantity Int      @default(0)
+  store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  sales         Sale[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Sale {
+  id            String   @id @default(cuid())
+  storeId       String
+  productId     String
+  quantitySold  Int
+  totalAmount   Float
+  profitAmount  Float    // Simplified: revenue - cost of goods (could just be totalAmount if cost is 0 for simplicity, we will track total amount as profit for this dashboard unless cost is provided)
+  saleDate      DateTime @default(now())
+  store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
