@@ -3,15 +3,26 @@
 import prisma from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 
+// ─────────────────────────────────────────────
+// CREATE PRODUCT
+// ─────────────────────────────────────────────
 export async function createProduct(formData: FormData) {
   const storeId = formData.get('storeId') as string
-  const name = formData.get('name') as string
-  const description = formData.get('description') as string
-  const imageUrl = formData.get('imageUrl') as string
+  const name = (formData.get('name') as string)?.trim()
+  const description = (formData.get('description') as string)?.trim() || null
+  const imageUrl = (formData.get('imageUrl') as string)?.trim() || null
   const price = parseFloat(formData.get('price') as string)
   const stockQuantity = parseInt(formData.get('stockQuantity') as string)
 
-  if (!storeId || !name || isNaN(price)) {
+  // FIX: validasi lebih ketat — price harus > 0, stockQuantity tidak boleh negatif
+  if (
+    !storeId ||
+    !name ||
+    isNaN(price) ||
+    price <= 0 ||
+    isNaN(stockQuantity) ||
+    stockQuantity < 0
+  ) {
     return { error: 'Data tidak lengkap atau tidak valid' }
   }
 
@@ -26,18 +37,35 @@ export async function createProduct(formData: FormData) {
   }
 }
 
-export async function recordSale(productId: string, storeId: string, quantity: number) {
+// ─────────────────────────────────────────────
+// RECORD SALE
+// ─────────────────────────────────────────────
+export async function recordSale(
+  productId: string,
+  storeId: string,
+  quantity: number
+) {
+  // FIX: validasi quantity sebelum masuk DB
+  if (!productId || !storeId || quantity <= 0 || !Number.isInteger(quantity)) {
+    return { error: 'Data penjualan tidak valid' }
+  }
+
   try {
-    // Get price first (read-only, safe)
-    const product = await prisma.product.findUnique({ where: { id: productId } })
-    if (!product) return { error: 'Produk tidak ditemukan' }
+    // FIX: semua operasi (termasuk read product) dilakukan di dalam satu transaction
+    // sehingga tidak ada gap antara baca price dan update stok
+    await prisma.$transaction(async (tx) => {
+      // Baca product di dalam transaction agar price tidak stale
+      const product = await tx.product.findUnique({
+        where: { id: productId }
+      })
 
-    const totalAmount = product.price * quantity
-    const profitAmount = totalAmount
+      if (!product) throw new Error('PRODUCT_NOT_FOUND')
 
-    // ATOMIC: updateMany with WHERE stockQuantity >= quantity
-    // Database guarantees only ONE update wins if two requests arrive simultaneously
-    await prisma.$transaction(async (tx: typeof prisma) => {
+      const totalAmount = product.price * quantity
+      const profitAmount = totalAmount
+
+      // Atomic: updateMany dengan WHERE stockQuantity >= quantity
+      // Jika dua request datang bersamaan, hanya satu yang menang
       const updated = await tx.product.updateMany({
         where: {
           id: productId,
@@ -47,12 +75,17 @@ export async function recordSale(productId: string, storeId: string, quantity: n
       })
 
       if (updated.count === 0) {
-        // Either stock was 0 or another request grabbed the last stock first
         throw new Error('INSUFFICIENT_STOCK')
       }
 
       await tx.sale.create({
-        data: { storeId, productId, quantitySold: quantity, totalAmount, profitAmount }
+        data: {
+          storeId,
+          productId,
+          quantitySold: quantity,
+          totalAmount,
+          profitAmount
+        }
       })
     })
 
@@ -60,6 +93,9 @@ export async function recordSale(productId: string, storeId: string, quantity: n
     revalidatePath('/')
     return { success: true }
   } catch (error: any) {
+    if (error?.message === 'PRODUCT_NOT_FOUND') {
+      return { error: 'Produk tidak ditemukan' }
+    }
     if (error?.message === 'INSUFFICIENT_STOCK') {
       return { error: 'Stok tidak cukup atau sudah habis terjual' }
     }
@@ -67,11 +103,18 @@ export async function recordSale(productId: string, storeId: string, quantity: n
   }
 }
 
+// ─────────────────────────────────────────────
+// DELETE PRODUCT
+// ─────────────────────────────────────────────
 export async function deleteProduct(productId: string, storeId: string) {
   try {
-    await prisma.product.delete({
-      where: { id: productId }
-    })
+    // FIX: hapus sales terkait terlebih dahulu dalam satu transaction
+    // agar tidak terjadi foreign key constraint error
+    await prisma.$transaction([
+      prisma.sale.deleteMany({ where: { productId } }),
+      prisma.product.delete({ where: { id: productId } })
+    ])
+
     revalidatePath(`/stores/${storeId}`)
     return { success: true }
   } catch (error) {
@@ -79,24 +122,32 @@ export async function deleteProduct(productId: string, storeId: string) {
   }
 }
 
+// ─────────────────────────────────────────────
+// BULK RESTOCK
+// ─────────────────────────────────────────────
 export async function bulkRestockProducts(
   restocks: { productId: string; qty: number }[],
   storeId: string
 ) {
-  const validRestocks = restocks.filter(r => r.qty > 0)
+  // FIX: qty harus integer positif, bukan sekadar > 0
+  const validRestocks = restocks.filter(
+    (r) => Number.isInteger(r.qty) && r.qty > 0
+  )
+
   if (validRestocks.length === 0) {
     return { error: 'Tidak ada produk yang diisi jumlah restoknya' }
   }
 
   try {
     await prisma.$transaction(
-      validRestocks.map(r =>
+      validRestocks.map((r) =>
         prisma.product.update({
           where: { id: r.productId },
           data: { stockQuantity: { increment: r.qty } }
         })
       )
     )
+
     revalidatePath(`/stores/${storeId}`)
     revalidatePath(`/stores/${storeId}/restock`)
     return { success: true, count: validRestocks.length }
