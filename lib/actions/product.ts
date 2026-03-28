@@ -41,6 +41,41 @@ export async function createProduct(formData: FormData) {
 }
 
 // ─────────────────────────────────────────────
+// UPDATE PRODUCT
+// ─────────────────────────────────────────────
+export async function updateProduct(formData: FormData) {
+  if (!(await getSession())) return { error: 'Unauthorized' }
+
+  const productId = formData.get('productId') as string
+  const storeId = formData.get('storeId') as string
+  const name = (formData.get('name') as string)?.trim()
+  const description = (formData.get('description') as string)?.trim() || null
+  const imageUrl = (formData.get('imageUrl') as string)?.trim() || null
+  const price = parseFloat(formData.get('price') as string)
+  const discount = parseInt(formData.get('discount') as string) || 0
+
+  if (!productId || !storeId || !name || isNaN(price) || price <= 0) {
+    return { error: 'Data tidak lengkap atau tidak valid' }
+  }
+
+  if (discount < 0 || discount > 100) {
+    return { error: 'Diskon harus antara 0 dan 100 persen' }
+  }
+
+  try {
+    await prisma.product.update({
+      where: { id: productId },
+      data: { name, description, imageUrl, price, discount }
+    })
+    revalidatePath(`/stores/${storeId}`)
+    revalidatePath('/')
+    return { success: true }
+  } catch (error) {
+    return { error: 'Gagal memperbarui produk' }
+  }
+}
+
+// ─────────────────────────────────────────────
 // RECORD SALE
 // ─────────────────────────────────────────────
 export async function recordSale(

@@ -33,6 +33,7 @@ model Product {
   description   String?
   imageUrl      String?
   price         Float
+  discount      Int      @default(0) // Discount percentage 0-100
   stockQuantity Int      @default(0)
   store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   sales         Sale[]
