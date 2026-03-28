@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { LayoutDashboard, Store as StoreIcon, LogOut, X } from 'lucide-react'
+import { LayoutDashboard, Store as StoreIcon, FileSpreadsheet, LogOut, X } from 'lucide-react'
 import { logoutAction } from '@/lib/actions/auth'
 
 interface SidebarProps {
@@ -47,6 +47,14 @@ export function Sidebar({ onClose, showCloseButton }: SidebarProps) {
         >
           <StoreIcon className="w-5 h-5 flex-shrink-0" />
           <span>Manajemen Cabang</span>
+        </Link>
+        <Link
+          href="/reports"
+          onClick={onClose}
+          className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-primary-50 dark:bg-primary-950/20 hover:text-primary-700 transition-colors font-medium text-sm"
+        >
+          <FileSpreadsheet className="w-5 h-5 flex-shrink-0" />
+          <span>Laporan</span>
         </Link>
       </nav>
 
