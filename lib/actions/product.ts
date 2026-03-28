@@ -70,8 +70,9 @@ export async function updateProduct(formData: FormData) {
     revalidatePath(`/stores/${storeId}`)
     revalidatePath('/')
     return { success: true }
-  } catch (error) {
-    return { error: 'Gagal memperbarui produk' }
+  } catch (error: any) {
+    console.error('updateProduct error:', error)
+    return { error: error?.message || 'Gagal memperbarui produk' }
   }
 }
 
@@ -100,7 +101,10 @@ export async function recordSale(
 
       if (!product) throw new Error('PRODUCT_NOT_FOUND')
 
-      const totalAmount = product.price * quantity
+      // Apply discount to price for sale calculation
+      const discountPct = (product as any).discount || 0
+      const effectivePrice = product.price * (1 - discountPct / 100)
+      const totalAmount = effectivePrice * quantity
       const profitAmount = totalAmount
 
       // Atomic: updateMany dengan WHERE stockQuantity >= quantity
