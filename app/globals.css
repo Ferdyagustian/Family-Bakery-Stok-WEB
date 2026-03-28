@@ -20,6 +20,8 @@
   --font-heading: 'Outfit', system-ui, sans-serif;
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   body {
     background-color: var(--color-background);

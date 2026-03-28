@@ -47,10 +47,10 @@ export function LowStockAlert({ products }: { products: LowStockProduct[] }) {
       {/* Bell Button */}
       <button
         onClick={() => setIsOpen(prev => !prev)}
-        className="relative p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
+        className="relative p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 transition-colors"
         aria-label="Notifikasi stok hampir habis"
       >
-        <Bell className={`w-5 h-5 ${count > 0 ? 'text-amber-500' : 'text-gray-400'}`} />
+        <Bell className={`w-5 h-5 ${count > 0 ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'}`} />
         {count > 0 && (
           <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
             {count > 9 ? '9+' : count}
@@ -60,7 +60,7 @@ export function LowStockAlert({ products }: { products: LowStockProduct[] }) {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-12 z-50 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+        <div className="absolute right-0 top-12 z-50 w-80 sm:w-96 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-amber-50 border-b border-amber-100">
             <div className="flex items-center gap-2">
@@ -95,13 +95,13 @@ export function LowStockAlert({ products }: { products: LowStockProduct[] }) {
           {/* Notification List */}
           <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
             {visible.length === 0 ? (
-              <div className="px-4 py-8 text-center text-gray-400">
+              <div className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
                 <Package className="w-8 h-8 mx-auto mb-2 opacity-40" />
                 <p className="text-sm">Semua notifikasi telah ditutup</p>
               </div>
             ) : (
               visible.map(product => (
-                <div key={product.id} className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                <div key={product.id} className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors">
                   {/* Stock indicator */}
                   <div className={`mt-0.5 flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold ${
                     product.stockQuantity === 0
@@ -113,8 +113,8 @@ export function LowStockAlert({ products }: { products: LowStockProduct[] }) {
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{product.name}</p>
-                    <p className="text-xs text-gray-500 mt-0.5 truncate">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{product.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                       📍 {product.storeName}
                     </p>
                     <p className={`text-xs font-medium mt-1 ${
@@ -147,7 +147,7 @@ export function LowStockAlert({ products }: { products: LowStockProduct[] }) {
                   {/* Dismiss button */}
                   <button
                     onClick={() => dismissOne(product.id)}
-                    className="flex-shrink-0 p-1 text-gray-300 hover:text-gray-500 transition-colors mt-0.5"
+                    className="flex-shrink-0 p-1 text-gray-300 hover:text-gray-500 dark:text-gray-400 transition-colors mt-0.5"
                     title="Tutup notifikasi ini"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -159,8 +159,8 @@ export function LowStockAlert({ products }: { products: LowStockProduct[] }) {
 
           {/* Footer */}
           {visible.length > 0 && (
-            <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-center">
-              <p className="text-xs text-gray-400">
+            <div className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 text-center">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
                 Klik &ldquo;Restok sekarang&rdquo; untuk menambah stok produk
               </p>
             </div>

@@ -21,11 +21,11 @@ function DeleteConfirmModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
         {/* Close button */}
         <button
           onClick={onCancel}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300 transition-colors"
           disabled={loading}
         >
           <X className="w-5 h-5" />
@@ -36,20 +36,20 @@ function DeleteConfirmModal({
           <AlertTriangle className="w-7 h-7 text-red-600" />
         </div>
 
-        <h3 className="text-lg font-heading font-bold text-gray-900 text-center">
+        <h3 className="text-lg font-heading font-bold text-gray-900 dark:text-white text-center">
           Hapus Produk?
         </h3>
-        <p className="text-gray-500 text-sm text-center mt-1 mb-5">
-          Produk <span className="font-semibold text-gray-800">"{productName}"</span> akan
+        <p className="text-gray-500 dark:text-gray-400 text-sm text-center mt-1 mb-5">
+          Produk <span className="font-semibold text-gray-800 dark:text-gray-100">"{productName}"</span> akan
           dihapus beserta semua riwayat penjualannya dan{' '}
           <span className="text-red-600 font-semibold">tidak dapat dikembalikan</span>.
         </p>
 
         {/* Typing confirmation */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
             Ketik{' '}
-            <code className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded font-mono text-sm">
+            <code className="bg-gray-100 dark:bg-gray-800 text-red-600 px-1.5 py-0.5 rounded font-mono text-sm">
               pastikan
             </code>{' '}
             untuk melanjutkan:
@@ -63,7 +63,7 @@ function DeleteConfirmModal({
                 ? 'border-red-300 bg-red-50 focus:ring-red-400'
                 : isMatch
                 ? 'border-green-400 bg-green-50 focus:ring-green-400'
-                : 'border-gray-300 focus:ring-primary-500'
+                : 'border-gray-300 dark:border-gray-600 focus:ring-primary-500'
             }`}
             placeholder='Ketik "pastikan"'
             disabled={loading}
@@ -82,14 +82,14 @@ function DeleteConfirmModal({
           <button
             onClick={onCancel}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors disabled:opacity-50"
           >
             Batal
           </button>
           <button
             onClick={onConfirm}
             disabled={!isMatch || loading}
-            className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+            className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors disabled:bg-gray-200 disabled:text-gray-400 dark:text-gray-500 disabled:cursor-not-allowed"
           >
             {loading ? 'Menghapus...' : 'Hapus Produk'}
           </button>
@@ -144,10 +144,10 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
         />
       )}
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col h-full overflow-hidden group hover:shadow-md transition-shadow">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full overflow-hidden group hover:shadow-md transition-shadow">
         {/* Product Image */}
         {product.imageUrl ? (
-          <div className="h-44 sm:h-48 bg-gray-100 overflow-hidden relative">
+          <div className="h-44 sm:h-48 bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
             <img
               src={product.imageUrl}
               alt={product.name}
@@ -174,7 +174,7 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
         <div className="flex flex-col flex-1 p-4 space-y-3">
           {/* Name + Delete */}
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-bold text-base text-gray-900 leading-tight line-clamp-2 flex-1">{product.name}</h3>
+            <h3 className="font-bold text-base text-gray-900 dark:text-white leading-tight line-clamp-2 flex-1">{product.name}</h3>
             <button
               onClick={() => setShowDeleteModal(true)}
               disabled={loading}
@@ -186,14 +186,14 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
           </div>
 
           {product.description && (
-            <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed">{product.description}</p>
+            <p className="text-gray-400 dark:text-gray-500 text-xs line-clamp-2 leading-relaxed">{product.description}</p>
           )}
 
           {/* Price & Stock */}
-          <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+          <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
             <div className="flex items-center gap-1.5">
               <Tag className="w-3.5 h-3.5 text-primary-500 flex-shrink-0" />
-              <span className="font-bold text-sm text-gray-800">
+              <span className="font-bold text-sm text-gray-800 dark:text-gray-100">
                 Rp {product.price.toLocaleString('id-ID')}
               </span>
             </div>
@@ -210,19 +210,19 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
 
           {/* Sale Controls */}
           <div className="flex items-center gap-2 pt-1">
-            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+            <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
               <button
                 onClick={() => adjustQty(-1)}
                 disabled={saleQty <= 1 || loading || isOutOfStock}
-                className="w-8 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-100 disabled:opacity-40 transition-colors"
+                className="w-8 h-9 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 disabled:opacity-40 transition-colors"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
-              <span className="w-8 text-center text-sm font-semibold text-gray-800">{saleQty}</span>
+              <span className="w-8 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">{saleQty}</span>
               <button
                 onClick={() => adjustQty(1)}
                 disabled={saleQty >= product.stockQuantity || loading || isOutOfStock}
-                className="w-8 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-100 disabled:opacity-40 transition-colors"
+                className="w-8 h-9 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 disabled:opacity-40 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
@@ -231,7 +231,7 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
             <button
               onClick={handleSale}
               disabled={loading || isOutOfStock}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-semibold py-2.5 rounded-lg transition-colors"
+              className="flex-1 flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 disabled:text-gray-400 dark:text-gray-500 text-white text-xs font-semibold py-2.5 rounded-lg transition-colors"
             >
               <ShoppingCart className="w-3.5 h-3.5" />
               {loading ? 'Mencatat...' : isOutOfStock ? 'Stok Habis' : 'Catat Jual'}

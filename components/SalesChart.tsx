@@ -148,25 +148,25 @@ export function SalesChart({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-lg sm:text-xl font-heading font-bold text-gray-900 flex items-center gap-2">
+          <h3 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-primary-600" />
             Grafik Penjualan Per Waktu
           </h3>
-          <p className="text-gray-500 text-sm mt-1">Perbandingan pendapatan &amp; keuntungan dari waktu ke waktu</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Perbandingan pendapatan &amp; keuntungan dari waktu ke waktu</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           {/* Mode toggle */}
-          <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
+          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setChartMode('stacked')}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${chartMode === 'stacked' ? 'bg-white shadow-sm text-primary-700' : 'text-gray-500'}`}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${chartMode === 'stacked' ? 'bg-white dark:bg-gray-900 shadow-sm text-primary-700' : 'text-gray-500 dark:text-gray-400'}`}
             >
               Per Produk
             </button>
             <button
               onClick={() => setChartMode('total')}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${chartMode === 'total' ? 'bg-white shadow-sm text-primary-700' : 'text-gray-500'}`}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${chartMode === 'total' ? 'bg-white dark:bg-gray-900 shadow-sm text-primary-700' : 'text-gray-500 dark:text-gray-400'}`}
             >
               Total
             </button>
@@ -174,7 +174,7 @@ export function SalesChart({
 
           {/* Store filter */}
           <select
-            className="h-9 text-sm rounded-lg border border-gray-200 px-3 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+            className="h-9 text-sm rounded-lg border border-gray-200 dark:border-gray-700 px-3 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-900"
             value={storeFilter}
             onChange={e => setStoreFilter(e.target.value)}
           >
@@ -183,12 +183,12 @@ export function SalesChart({
           </select>
 
           {/* Time filter */}
-          <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
+          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
             {(['daily', 'monthly', 'yearly'] as const).map(f => (
               <button
                 key={f}
                 onClick={() => setTimeFilter(f)}
-                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${timeFilter === f ? 'bg-white shadow-sm text-primary-700' : 'text-gray-500'}`}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${timeFilter === f ? 'bg-white dark:bg-gray-900 shadow-sm text-primary-700' : 'text-gray-500 dark:text-gray-400'}`}
               >
                 {f === 'daily' ? 'Harian' : f === 'monthly' ? 'Bulanan' : 'Tahunan'}
               </button>
@@ -257,9 +257,9 @@ export function SalesChart({
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500">
             <Calendar className="w-12 h-12 mb-3 opacity-30" />
-            <p className="text-sm font-medium text-gray-500">Tidak ada data untuk filter ini</p>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Tidak ada data untuk filter ini</p>
           </div>
         )}
       </div>

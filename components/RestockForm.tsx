@@ -83,30 +83,30 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
       )}
 
       {/* Toolbar */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             placeholder="Cari produk..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 h-10 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full pl-9 pr-3 h-10 rounded-lg border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
 
         {/* Stats + Actions */}
         <div className="flex items-center gap-3 flex-wrap">
           {totalUpdated > 0 && (
-            <div className="flex items-center gap-4 text-sm text-gray-600 bg-primary-50 px-3 py-1.5 rounded-lg">
+            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300 bg-primary-50 dark:bg-primary-950/20 px-3 py-1.5 rounded-lg">
               <span><span className="font-bold text-primary-700">{totalUpdated}</span> produk</span>
               <span><span className="font-bold text-primary-700">+{totalUnitsAdded}</span> unit total</span>
             </div>
           )}
           <button
             onClick={handleReset}
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors"
             disabled={loading}
           >
             <RotateCcw className="w-4 h-4" />
@@ -115,7 +115,7 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
           <button
             onClick={handleSubmit}
             disabled={loading || totalUpdated === 0}
-            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm px-5 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-200 disabled:text-gray-400 dark:text-gray-500 text-white font-semibold text-sm px-5 py-2 rounded-lg transition-colors"
           >
             {loading ? (
               <>
@@ -134,9 +134,9 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
 
       {/* Products List */}
       {filteredProducts.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p className="font-medium text-gray-500">Produk tidak ditemukan</p>
+          <p className="font-medium text-gray-500 dark:text-gray-400">Produk tidak ditemukan</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -149,19 +149,19 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
             return (
               <div
                 key={product.id}
-                className={`bg-white rounded-xl border-2 shadow-sm transition-all duration-200 overflow-hidden ${
+                className={`bg-white dark:bg-gray-900 rounded-xl border-2 shadow-sm transition-all duration-200 overflow-hidden ${
                   hasValue
                     ? 'border-primary-300 shadow-primary-100'
-                    : 'border-gray-100 hover:border-gray-200'
+                    : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:border-gray-700'
                 }`}
               >
                 {/* Product image */}
                 {product.imageUrl ? (
-                  <div className="h-36 overflow-hidden bg-gray-100">
+                  <div className="h-36 overflow-hidden bg-gray-100 dark:bg-gray-800">
                     <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <div className="h-36 bg-gradient-to-br from-primary-50 to-purple-100 flex items-center justify-center">
+                  <div className="h-36 bg-gradient-to-br from-primary-50 dark:from-gray-900 to-purple-100 flex items-center justify-center">
                     <Package className="w-10 h-10 text-primary-200" />
                   </div>
                 )}
@@ -169,15 +169,15 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
                 <div className="p-4 space-y-3">
                   {/* Product info */}
                   <div>
-                    <h3 className="font-bold text-sm text-gray-900 line-clamp-1">{product.name}</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <h3 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-1">{product.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                       Rp {product.price.toLocaleString('id-ID')}
                     </p>
                   </div>
 
                   {/* Current stock badge */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Stok saat ini:</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Stok saat ini:</span>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                       isOutOfStock
                         ? 'bg-red-100 text-red-600'
@@ -191,7 +191,7 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
 
                   {/* Restock input */}
                   <div>
-                    <label className="text-xs font-medium text-gray-600 mb-1 block">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 block">
                       Tambah stok:
                     </label>
                     <div className="flex items-center gap-2">
@@ -204,12 +204,12 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
                         disabled={loading}
                         className={`flex-1 h-10 rounded-lg border text-sm text-center font-semibold focus:outline-none focus:ring-2 transition-colors ${
                           hasValue
-                            ? 'border-primary-400 bg-primary-50 text-primary-700 focus:ring-primary-500'
-                            : 'border-gray-200 text-gray-700 focus:ring-primary-400'
+                            ? 'border-primary-400 bg-primary-50 dark:bg-primary-950/20 text-primary-700 focus:ring-primary-500'
+                            : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 focus:ring-primary-400'
                         }`}
                       />
                       {hasValue && (
-                        <div className="flex-shrink-0 text-xs text-primary-600 font-semibold bg-primary-50 px-2 py-1.5 rounded-lg border border-primary-200">
+                        <div className="flex-shrink-0 text-xs text-primary-600 font-semibold bg-primary-50 dark:bg-primary-950/20 px-2 py-1.5 rounded-lg border border-primary-200">
                           {product.stockQuantity} → {product.stockQuantity + qty}
                         </div>
                       )}
@@ -228,7 +228,7 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
           <button
             onClick={handleSubmit}
             disabled={loading || totalUpdated === 0}
-            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 disabled:text-gray-500 text-white font-semibold text-sm px-8 py-3 rounded-full shadow-lg shadow-primary-200 transition-all"
+            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 disabled:text-gray-500 dark:text-gray-400 text-white font-semibold text-sm px-8 py-3 rounded-full shadow-lg shadow-primary-200 transition-all"
           >
             {loading ? 'Menyimpan...' : `Simpan Restok (${totalUpdated} produk, +${totalUnitsAdded} unit)`}
           </button>

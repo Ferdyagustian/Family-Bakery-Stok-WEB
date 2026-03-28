@@ -22,16 +22,16 @@ export default async function RestockPage({ params }: { params: Promise<{ id: st
       <div className="flex items-center gap-3 flex-wrap">
         <Link
           href={`/stores/${storeId}`}
-          className="p-2 bg-white rounded-full border border-gray-200 hover:bg-gray-50 text-gray-500 shadow-sm transition-colors flex-shrink-0"
+          className="p-2 bg-white dark:bg-gray-900 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 text-gray-500 dark:text-gray-400 shadow-sm transition-colors flex-shrink-0"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div className="min-w-0">
-          <h1 className="text-lg sm:text-2xl font-heading font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-lg sm:text-2xl font-heading font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 flex-shrink-0" />
             <span className="truncate">Restok Barang</span>
           </h1>
-          <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
+          <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-0.5">
             <Store className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="truncate">{store.name}</span>
           </p>
@@ -39,7 +39,7 @@ export default async function RestockPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Info Banner */}
-      <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 text-sm text-primary-800">
+      <div className="bg-primary-50 dark:bg-primary-950/20 border border-primary-200 rounded-xl p-4 text-sm text-primary-800">
         <p className="font-semibold mb-1">📦 Cara Penggunaan:</p>
         <ul className="space-y-0.5 text-primary-700 list-disc list-inside">
           <li>Isi jumlah unit yang <strong>ditambahkan</strong> (bukan jumlah total) untuk produk yang perlu direstok</li>
@@ -50,9 +50,9 @@ export default async function RestockPage({ params }: { params: Promise<{ id: st
 
       {/* Restock Form */}
       {store.products.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-12 text-center text-gray-400">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm p-12 text-center text-gray-400 dark:text-gray-500">
           <Store className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p className="font-semibold text-gray-600">Belum ada produk di cabang ini</p>
+          <p className="font-semibold text-gray-600 dark:text-gray-300">Belum ada produk di cabang ini</p>
           <p className="text-sm mt-1">Tambahkan produk terlebih dahulu di halaman detail toko</p>
           <Link
             href={`/stores/${storeId}`}

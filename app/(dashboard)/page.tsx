@@ -50,10 +50,10 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       {/* Page Title */}
       <div>
-        <h1 className="text-xl sm:text-2xl font-heading font-bold text-gray-900">
+        <h1 className="text-xl sm:text-2xl font-heading font-bold text-gray-900 dark:text-white">
           Selamat Datang, Admin! 👋
         </h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
           Ringkasan kinerja bisnis Vanilla Bakery Anda.
         </p>
       </div>
@@ -64,7 +64,7 @@ export default async function DashboardPage() {
           title="Total Cabang"
           value={stores.length}
           icon={<Store className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600" />}
-          bg="bg-primary-50"
+          bg="bg-primary-50 dark:bg-primary-950/20"
         />
         <StatCard
           title="Total Produk"
@@ -94,13 +94,13 @@ export default async function DashboardPage() {
       <ProductSalesBreakdown data={productSales} stores={storeList} />
 
       {/* Time-based Sales Chart */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
         {stores.length > 0 ? (
           <SalesChart data={formattedSales} stores={storeList} productSales={productSales} />
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-gray-500">
             <TrendingUp className="w-14 h-14 mb-4 opacity-30" />
-            <h3 className="text-lg font-heading font-semibold text-gray-600">
+            <h3 className="text-lg font-heading font-semibold text-gray-600 dark:text-gray-300">
               Belum Ada Data Penjualan
             </h3>
             <p className="text-sm mt-1 text-center max-w-xs">
@@ -125,12 +125,12 @@ function StatCard({
   bg: string
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5 hover:-translate-y-0.5 transition-transform">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 sm:p-5 hover:-translate-y-0.5 transition-transform">
       <div className={`w-10 h-10 sm:w-12 sm:h-12 ${bg} rounded-xl flex items-center justify-center mb-3`}>
         {icon}
       </div>
-      <p className="text-gray-500 text-xs sm:text-sm font-medium truncate">{title}</p>
-      <p className="text-lg sm:text-2xl font-bold font-heading text-gray-900 mt-1 truncate">
+      <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium truncate">{title}</p>
+      <p className="text-lg sm:text-2xl font-bold font-heading text-gray-900 dark:text-white mt-1 truncate">
         {value}
       </p>
     </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Sidebar } from '@/components/Sidebar'
 import { LowStockAlert } from '@/components/LowStockAlert'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Menu, Store } from 'lucide-react'
 
 type LowStockProduct = {
@@ -23,7 +24,7 @@ export function DashboardShell({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-800">
 
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
@@ -52,12 +53,12 @@ export function DashboardShell({
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
 
         {/* Top Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+        <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
           <div className="flex items-center gap-3">
             {/* Hamburger */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
+              className="lg:hidden p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 transition-colors"
               aria-label="Buka menu"
             >
               <Menu className="w-6 h-6" />
@@ -65,15 +66,18 @@ export function DashboardShell({
 
             {/* Logo (mobile only) */}
             <div className="lg:hidden flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center p-0.5 shadow-sm border border-gray-100 overflow-hidden">
+              <div className="w-8 h-8 rounded-lg bg-white dark:bg-gray-900 flex items-center justify-center p-0.5 shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
                 <img src="/logo.png" alt="Family Bakery Logo" className="w-full h-full object-contain" />
               </div>
-              <span className="font-heading font-bold text-gray-900 text-sm">Family Bakery</span>
+              <span className="font-heading font-bold text-gray-900 dark:text-white text-sm">Family Bakery</span>
             </div>
           </div>
 
           {/* Right side */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* 🔔 Low stock notification bell */}
             <LowStockAlert products={lowStockProducts} />
 
@@ -82,7 +86,7 @@ export function DashboardShell({
               <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-sm">
                 A
               </div>
-              <span className="hidden sm:block font-medium text-sm text-gray-700">Admin</span>
+              <span className="hidden sm:block font-medium text-sm text-gray-700 dark:text-gray-200">Admin</span>
             </div>
           </div>
         </header>

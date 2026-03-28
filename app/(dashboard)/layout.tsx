@@ -8,7 +8,7 @@ export default async function DashboardLayout({
 }) {
   // Fetch products where stock < 3, include store name for notification
   const lowStockProducts = await prisma.product.findMany({
-    where: { stockQuantity: { lt: 3 } },
+    where: { stockQuantity: { lt: 7 } },
     include: { store: { select: { name: true } } },
     orderBy: { stockQuantity: 'asc' },
   })

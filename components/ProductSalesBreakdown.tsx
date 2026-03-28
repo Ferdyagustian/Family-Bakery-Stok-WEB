@@ -104,22 +104,22 @@ export function ProductSalesBreakdown({
   const periodLabel = timeFilter === 'daily' ? 'Hari Ini' : timeFilter === 'monthly' ? 'Bulan Ini' : 'Tahun Ini'
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-lg sm:text-xl font-heading font-bold text-gray-900 flex items-center gap-2">
+          <h3 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Package className="w-5 h-5 text-primary-600" />
             Breakdown Penjualan Produk
           </h3>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
             Produk terjual &amp; profit — <span className="font-semibold text-primary-600">{periodLabel}</span>
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <select
-            className="h-9 text-sm rounded-lg border border-gray-200 px-3 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+            className="h-9 text-sm rounded-lg border border-gray-200 dark:border-gray-700 px-3 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-900"
             value={storeFilter}
             onChange={e => setStoreFilter(e.target.value)}
           >
@@ -129,14 +129,14 @@ export function ProductSalesBreakdown({
             ))}
           </select>
 
-          <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
+          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
             {(['daily', 'monthly', 'yearly'] as const).map(f => (
               <button
                 key={f}
                 onClick={() => setTimeFilter(f)}
                 className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${timeFilter === f
-                  ? 'bg-white shadow-sm text-primary-700'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-white dark:bg-gray-900 shadow-sm text-primary-700'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
                   }`}
               >
                 {f === 'daily' ? 'Harian' : f === 'monthly' ? 'Bulanan' : 'Tahunan'}
@@ -147,9 +147,9 @@ export function ProductSalesBreakdown({
       </div>
 
       {productData.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-14 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-14 text-gray-400 dark:text-gray-500">
           <Package className="w-12 h-12 mb-3 opacity-30" />
-          <p className="font-medium text-gray-500">Tidak ada penjualan pada periode ini</p>
+          <p className="font-medium text-gray-500 dark:text-gray-400">Tidak ada penjualan pada periode ini</p>
           <p className="text-sm mt-1">Catat penjualan di halaman cabang untuk melihat data</p>
         </div>
       ) : (
@@ -157,7 +157,7 @@ export function ProductSalesBreakdown({
 
           {/* Pie Chart */}
           <div className="flex flex-col items-center">
-            <p className="text-sm font-semibold text-gray-600 mb-3">Distribusi Pendapatan</p>
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3">Distribusi Pendapatan</p>
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
@@ -200,13 +200,13 @@ export function ProductSalesBreakdown({
             {/* Summary totals below pie */}
             <div className="flex gap-6 mt-2">
               <div className="text-center">
-                <p className="text-xs text-gray-500">Total Pendapatan</p>
-                <p className="text-base font-bold text-gray-800">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total Pendapatan</p>
+                <p className="text-base font-bold text-gray-800 dark:text-gray-100">
                   Rp {totalRevenue.toLocaleString('id-ID')}
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-500">Total Profit</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total Profit</p>
                 <p className="text-base font-bold text-primary-700">
                   Rp {totalProfit.toLocaleString('id-ID')}
                 </p>
@@ -216,12 +216,12 @@ export function ProductSalesBreakdown({
 
           {/* Ranking Table */}
           <div className="overflow-hidden">
-            <p className="text-sm font-semibold text-gray-600 mb-3">Ranking Produk Terlaris</p>
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3">Ranking Produk Terlaris</p>
             <div className="space-y-2 overflow-y-auto max-h-[340px] pr-1">
               {productData.map((product, index) => {
                 const revenuePercent = totalRevenue > 0 ? (product.revenue / totalRevenue) * 100 : 0
                 return (
-                  <div key={index} className="bg-gray-50 rounded-xl p-3">
+                  <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
                     <div className="flex items-center gap-3 mb-2">
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
@@ -230,11 +230,11 @@ export function ProductSalesBreakdown({
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm truncate">{product.name}</p>
-                        <p className="text-xs text-gray-500">{product.qty} unit terjual</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{product.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{product.qty} unit terjual</p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-bold text-gray-800">
+                        <p className="text-sm font-bold text-gray-800 dark:text-gray-100">
                           Rp {product.revenue.toLocaleString('id-ID')}
                         </p>
                         <p className="text-xs text-primary-600 font-medium">
@@ -252,7 +252,7 @@ export function ProductSalesBreakdown({
                         }}
                       />
                     </div>
-                    <p className="text-right text-xs text-gray-400 mt-0.5">
+                    <p className="text-right text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                       {revenuePercent.toFixed(1)}% dari total
                     </p>
                   </div>
