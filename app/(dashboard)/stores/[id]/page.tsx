@@ -6,6 +6,8 @@ import { ChevronLeft, Store, Package, RefreshCw } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { DeleteStoreButton } from '@/components/DeleteStoreButton'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StoreDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: storeId } = await params
 

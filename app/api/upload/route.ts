@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
-import { join } from "path";
-import { existsSync, mkdirSync } from "fs";
 import { getSession } from "@/lib/session";
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -32,25 +29,11 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = file.name.split('.').pop();
-    const filename = `${uniqueSuffix}.${ext}`;
+    // Convert to base64 data URI to avoid filesystem write issues
+    const base64 = buffer.toString('base64');
+    const dataUri = `data:${file.type};base64,${base64}`;
 
-    // Path to public/uploads directory
-    const uploadDir = join(process.cwd(), "public", "uploads");
-    
-    // Ensure directory exists
-    if (!existsSync(uploadDir)) {
-      mkdirSync(uploadDir, { recursive: true });
-    }
-
-    const path = join(uploadDir, filename);
-
-    // Write file
-    await writeFile(path, buffer);
-
-    return NextResponse.json({ success: true, url: `/uploads/${filename}` });
+    return NextResponse.json({ success: true, url: dataUri });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ success: false, error: "Upload failed" }, { status: 500 });

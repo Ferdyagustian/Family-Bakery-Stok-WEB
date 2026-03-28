@@ -18,8 +18,8 @@ export default async function LoginPage(props: { searchParams: SearchParams }) {
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-primary-600 flex items-center justify-center shadow-xl shadow-primary-200">
-            <Store className="w-10 h-10 text-white" />
+          <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-2 shadow-xl shadow-primary-200">
+            <img src="/logo.png" alt="Family Bakery Logo" className="w-full h-full object-contain" />
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-heading font-extrabold text-gray-900">

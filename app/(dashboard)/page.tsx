@@ -3,6 +3,8 @@ import { SalesChart } from '@/components/SalesChart'
 import { ProductSalesBreakdown } from '@/components/ProductSalesBreakdown'
 import { Store, Package, TrendingUp, CircleDollarSign } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const [stores, products, sales] = await Promise.all([
     prisma.store.findMany(),

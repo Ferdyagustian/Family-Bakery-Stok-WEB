@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { Store as StoreIcon, MapPin, ChevronRight, Package, TrendingUp } from 'lucide-react'
 import { AddStoreForm } from '@/components/AddStoreForm'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StoresPage() {
   const stores = await prisma.store.findMany({
     orderBy: { createdAt: 'desc' },
