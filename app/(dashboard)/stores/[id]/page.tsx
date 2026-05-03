@@ -1,6 +1,6 @@
 import prisma from '@/lib/db'
 import { AddProductModal } from '@/components/AddProductModal'
-import { ProductCard } from '@/components/ProductCard'
+import { ProductSearchList } from '@/components/ProductSearchList'
 import Link from 'next/link'
 import { ChevronLeft, Store, Package, RefreshCw } from 'lucide-react'
 import { notFound } from 'next/navigation'
@@ -73,19 +73,8 @@ export default async function StoreDetailPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-        {store.products.map((product: any) => (
-          <ProductCard key={product.id} product={product} storeId={storeId} />
-        ))}
-        {store.products.length === 0 && (
-          <div className="col-span-full flex flex-col items-center justify-center p-10 bg-white dark:bg-gray-900 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500">
-            <Package className="w-12 h-12 mb-3" />
-            <p className="text-base font-semibold text-gray-600 dark:text-gray-300">Belum ada produk di cabang ini</p>
-            <p className="text-sm text-center mt-1">Klik "Tambah Produk" untuk mulai mengisi stok</p>
-          </div>
-        )}
-      </div>
+      {/* Product Search & Grid */}
+      <ProductSearchList products={store.products} storeId={storeId} />
     </div>
   )
 }
