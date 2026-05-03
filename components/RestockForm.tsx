@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { bulkRestockProducts } from '@/lib/actions/product'
 import { useRouter } from 'next/navigation'
 import { Package, RotateCcw, CheckCircle, AlertCircle, Search } from 'lucide-react'
+import Image from 'next/image'
 
 type Product = {
   id: string
@@ -157,8 +158,8 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
               >
                 {/* Product image */}
                 {product.imageUrl ? (
-                  <div className="h-36 overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                  <div className="h-36 overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
+                    <Image src={product.imageUrl} alt={product.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />
                   </div>
                 ) : (
                   <div className="h-36 bg-gradient-to-br from-primary-50 dark:from-gray-900 to-purple-100 flex items-center justify-center">

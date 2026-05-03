@@ -68,7 +68,6 @@ export async function updateProduct(formData: FormData) {
       data: { name, description, imageUrl, price, discount }
     })
     revalidatePath(`/stores/${storeId}`)
-    revalidatePath('/')
     return { success: true }
   } catch (error: any) {
     console.error('updateProduct error:', error)
@@ -133,7 +132,6 @@ export async function recordSale(
     })
 
     revalidatePath(`/stores/${storeId}`)
-    revalidatePath('/')
     return { success: true }
   } catch (error: any) {
     if (error?.message === 'PRODUCT_NOT_FOUND') {

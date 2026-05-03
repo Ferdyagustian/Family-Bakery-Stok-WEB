@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useOptimistic, useTransition } from 'react'
 import { recordSale, deleteProduct } from '@/lib/actions/product'
 import { EditProductModal } from '@/components/EditProductModal'
-import { Trash2, Package, Tag, ShoppingCart, Minus, Plus, AlertTriangle, X, Percent } from 'lucide-react'
+import { Trash2, Package, Tag, ShoppingCart, Minus, Plus, AlertTriangle, X, Percent, CheckCircle2 } from 'lucide-react'
+import Image from 'next/image'
 
 // ── Delete Confirmation Modal ──────────────────────────────────────
 function DeleteConfirmModal({
@@ -23,7 +24,6 @@ function DeleteConfirmModal({
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
-        {/* Close button */}
         <button
           onClick={onCancel}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
@@ -32,7 +32,6 @@ function DeleteConfirmModal({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Warning icon */}
         <div className="flex items-center justify-center w-14 h-14 rounded-full bg-red-100 mx-auto mb-4">
           <AlertTriangle className="w-7 h-7 text-red-600" />
         </div>
@@ -46,7 +45,6 @@ function DeleteConfirmModal({
           <span className="text-red-600 font-semibold">tidak dapat dikembalikan</span>.
         </p>
 
-        {/* Typing confirmation */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
             Ketik{' '}
@@ -78,7 +76,6 @@ function DeleteConfirmModal({
           )}
         </div>
 
-        {/* Action buttons */}
         <div className="flex gap-3">
           <button
             onClick={onCancel}
@@ -102,36 +99,56 @@ function DeleteConfirmModal({
 
 // ── Product Card ───────────────────────────────────────────────────
 export function ProductCard({ product, storeId }: { product: any, storeId: string }) {
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [deleteLoading, setDeleteLoading] = useState(false)
   const [saleQty, setSaleQty] = useState(1)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [saleSuccess, setSaleSuccess] = useState(false)
+
+  // ── Optimistic stock update ────────────────────────────────────
+  const [optimisticStock, setOptimisticStock] = useOptimistic(
+    product.stockQuantity,
+    (current: number, sold: number) => Math.max(0, current - sold)
+  )
 
   const adjustQty = (delta: number) => {
-    setSaleQty(prev => Math.max(1, Math.min(product.stockQuantity, prev + delta)))
+    setSaleQty(prev => Math.max(1, Math.min(optimisticStock, prev + delta)))
   }
 
   async function handleSale() {
-    if (saleQty <= 0 || product.stockQuantity === 0) return
-    setLoading(true)
-    const res = await recordSale(product.id, storeId, saleQty)
-    setLoading(false)
-    if (res?.error) alert(res.error)
-    else setSaleQty(1)
+    if (saleQty <= 0 || optimisticStock === 0) return
+
+    const qtySold = saleQty
+    setSaleQty(1)
+
+    startTransition(async () => {
+      // Update UI instantly (optimistic)
+      setOptimisticStock(qtySold)
+
+      const res = await recordSale(product.id, storeId, qtySold)
+      if (res?.error) {
+        // On error, revert happens automatically via useOptimistic
+        alert(res.error)
+      } else {
+        // Show success checkmark briefly
+        setSaleSuccess(true)
+        setTimeout(() => setSaleSuccess(false), 1500)
+      }
+    })
   }
 
   async function handleDeleteConfirmed() {
-    setLoading(true)
+    setDeleteLoading(true)
     const res = await deleteProduct(product.id, storeId)
-    setLoading(false)
+    setDeleteLoading(false)
     if (res?.error) {
       alert(res.error)
       setShowDeleteModal(false)
     }
-    // On success, the page refreshes via revalidatePath — modal disappears naturally
   }
 
-  const isOutOfStock = product.stockQuantity === 0
-  const isLowStock = product.stockQuantity > 0 && product.stockQuantity < 10
+  const isOutOfStock = optimisticStock === 0
+  const isLowStock = optimisticStock > 0 && optimisticStock < 10
   const hasDiscount = product.discount > 0
   const discountedPrice = hasDiscount
     ? product.price * (1 - product.discount / 100)
@@ -139,31 +156,33 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
 
   return (
     <>
-      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <DeleteConfirmModal
           productName={product.name}
           onConfirm={handleDeleteConfirmed}
           onCancel={() => setShowDeleteModal(false)}
-          loading={loading}
+          loading={deleteLoading}
         />
       )}
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full overflow-hidden group hover:shadow-md transition-shadow">
+      <div className={`bg-white dark:bg-gray-900 rounded-xl border shadow-sm flex flex-col h-full overflow-hidden group hover:shadow-md transition-all duration-200 ${
+        isPending ? 'border-green-300 dark:border-green-700' : 'border-gray-100 dark:border-gray-800'
+      }`}>
         {/* Product Image */}
         {product.imageUrl ? (
           <div className="h-44 sm:h-48 bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
-            <img
+            <Image
               src={product.imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
             {isOutOfStock && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <span className="text-white font-bold text-sm bg-red-600 px-3 py-1 rounded-full">Habis</span>
               </div>
             )}
-            {/* Discount Badge */}
             {hasDiscount && (
               <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-md">
                 <Percent className="w-3 h-3" />
@@ -179,7 +198,6 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
                 <span className="text-white font-bold text-sm bg-red-600 px-3 py-1 rounded-full">Habis</span>
               </div>
             )}
-            {/* Discount Badge */}
             {hasDiscount && (
               <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-md">
                 <Percent className="w-3 h-3" />
@@ -208,7 +226,7 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
               />
               <button
                 onClick={() => setShowDeleteModal(true)}
-                disabled={loading}
+                disabled={deleteLoading}
                 className="text-gray-300 hover:text-red-500 transition-colors p-1 flex-shrink-0"
                 title="Hapus Produk"
               >
@@ -240,14 +258,15 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
                 </span>
               )}
             </div>
-            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+            {/* Optimistic stock display */}
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full transition-colors ${
               isOutOfStock
                 ? 'bg-red-100 text-red-600'
                 : isLowStock
                 ? 'bg-yellow-100 text-yellow-700'
                 : 'bg-green-100 text-green-700'
             }`}>
-              {isOutOfStock ? 'Habis' : `${product.stockQuantity} stok`}
+              {isOutOfStock ? 'Habis' : `${optimisticStock} stok`}
             </span>
           </div>
 
@@ -256,7 +275,7 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
             <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
               <button
                 onClick={() => adjustQty(-1)}
-                disabled={saleQty <= 1 || loading || isOutOfStock}
+                disabled={saleQty <= 1 || isPending || isOutOfStock}
                 className="w-8 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
               >
                 <Minus className="w-3.5 h-3.5" />
@@ -264,7 +283,7 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
               <span className="w-8 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">{saleQty}</span>
               <button
                 onClick={() => adjustQty(1)}
-                disabled={saleQty >= product.stockQuantity || loading || isOutOfStock}
+                disabled={saleQty >= optimisticStock || isPending || isOutOfStock}
                 className="w-8 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -273,11 +292,26 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
 
             <button
               onClick={handleSale}
-              disabled={loading || isOutOfStock}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-semibold py-2.5 rounded-lg transition-colors"
+              disabled={isPending || isOutOfStock}
+              className={`flex-1 flex items-center justify-center gap-1.5 text-white text-xs font-semibold py-2.5 rounded-lg transition-all duration-200 ${
+                saleSuccess
+                  ? 'bg-emerald-500'
+                  : isPending
+                  ? 'bg-green-500 opacity-80'
+                  : isOutOfStock
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700'
+              }`}
             >
-              <ShoppingCart className="w-3.5 h-3.5" />
-              {loading ? 'Mencatat...' : isOutOfStock ? 'Stok Habis' : 'Catat Jual'}
+              {saleSuccess ? (
+                <><CheckCircle2 className="w-3.5 h-3.5" /> Tercatat!</>
+              ) : isPending ? (
+                <><div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Mencatat...</>
+              ) : isOutOfStock ? (
+                'Stok Habis'
+              ) : (
+                <><ShoppingCart className="w-3.5 h-3.5" /> Catat Jual</>
+              )}
             </button>
           </div>
         </div>
