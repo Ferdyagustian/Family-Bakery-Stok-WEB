@@ -101,7 +101,7 @@ function DeleteConfirmModal({
 export function ProductCard({ product, storeId }: { product: any, storeId: string }) {
   const [isPending, startTransition] = useTransition()
   const [deleteLoading, setDeleteLoading] = useState(false)
-  const [saleQty, setSaleQty] = useState(1)
+  const [saleQty, setSaleQty] = useState<number | ''>(1)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [saleSuccess, setSaleSuccess] = useState(false)
 
@@ -112,13 +112,14 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
   )
 
   const adjustQty = (delta: number) => {
-    setSaleQty(prev => Math.max(1, Math.min(optimisticStock, prev + delta)))
+    const current = typeof saleQty === 'number' ? saleQty : 1
+    setSaleQty(Math.max(1, Math.min(optimisticStock, current + delta)))
   }
 
   async function handleSale() {
-    if (saleQty <= 0 || optimisticStock === 0) return
+    const qtySold = typeof saleQty === 'number' ? saleQty : 1
+    if (qtySold <= 0 || optimisticStock === 0) return
 
-    const qtySold = saleQty
     setSaleQty(1)
 
     startTransition(async () => {
@@ -275,15 +276,32 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
             <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
               <button
                 onClick={() => adjustQty(-1)}
-                disabled={saleQty <= 1 || isPending || isOutOfStock}
+                disabled={typeof saleQty !== 'number' || saleQty <= 1 || isPending || isOutOfStock}
                 className="w-8 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
-              <span className="w-8 text-center text-sm font-semibold text-gray-800 dark:text-gray-100">{saleQty}</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={saleQty}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value.replace(/\D/g, ''))
+                  if (isNaN(val)) {
+                    setSaleQty('')
+                  } else {
+                    setSaleQty(Math.min(optimisticStock, val))
+                  }
+                }}
+                onBlur={() => {
+                  if (saleQty === '' || saleQty < 1) setSaleQty(1)
+                }}
+                disabled={isPending || isOutOfStock}
+                className="w-10 text-center text-sm font-semibold text-gray-800 dark:text-gray-100 bg-transparent border-none focus:outline-none focus:ring-0 p-0"
+              />
               <button
                 onClick={() => adjustQty(1)}
-                disabled={saleQty >= optimisticStock || isPending || isOutOfStock}
+                disabled={typeof saleQty === 'number' && saleQty >= optimisticStock || isPending || isOutOfStock}
                 className="w-8 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
