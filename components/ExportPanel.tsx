@@ -165,8 +165,8 @@ export function ExportPanel({ stores }: { stores: StoreOption[] }) {
                 onChange={(e) => { setType(e.target.value as any); setPreviewData(null) }}
                 className="flex h-11 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none"
               >
-                <option value="sales">📊 Penjualan</option>
-                <option value="stock">📦 Stok Produk</option>
+                <option value="sales">Penjualan</option>
+                <option value="stock">Stok Produk</option>
               </select>
               <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
@@ -183,7 +183,7 @@ export function ExportPanel({ stores }: { stores: StoreOption[] }) {
                 onChange={(e) => { setStoreId(e.target.value); setPreviewData(null) }}
                 className="flex h-11 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none"
               >
-                <option value="">🏪 Semua Cabang</option>
+                <option value="">Semua Cabang</option>
                 {stores.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
@@ -327,13 +327,12 @@ export function ExportPanel({ stores }: { stores: StoreOption[] }) {
                         <td className="px-4 py-2.5 text-right text-gray-600 dark:text-gray-300">{fmtRp(row.harga)}</td>
                         <td className="px-4 py-2.5 text-right text-gray-800 dark:text-gray-100">{row.stok}</td>
                         <td className="px-4 py-2.5">
-                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${
-                            row.status === 'Habis'
-                              ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                              : row.status === 'Hampir Habis'
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${row.status === 'Habis'
+                            ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                            : row.status === 'Hampir Habis'
                               ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
                               : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                          }`}>
+                            }`}>
                             {row.status}
                           </span>
                         </td>

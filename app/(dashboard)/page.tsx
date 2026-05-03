@@ -2,37 +2,57 @@ import prisma from '@/lib/db'
 import { SalesChart } from '@/components/SalesChart'
 import { ProductSalesBreakdown } from '@/components/ProductSalesBreakdown'
 import { Store, Package, TrendingUp, CircleDollarSign } from 'lucide-react'
+import { Suspense } from 'react'
 
-export const dynamic = 'force-dynamic'
+// Bukan force-dynamic agar bisa di-cache, tapi revalidate tiap 60 detik
+export const revalidate = 60
 
-export default async function DashboardPage() {
-  const [stores, products, sales] = await Promise.all([
-    prisma.store.findMany(),
+async function DashboardData() {
+  // Batas 30 hari terakhir — hindari tarik semua data
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+  const [stores, productCount, salesAgg, sales] = await Promise.all([
+    // Hanya ambil data yang dibutuhkan
+    prisma.store.findMany({ select: { id: true, name: true } }),
+
+    // Count saja, bukan findMany
     prisma.product.count(),
+
+    // Agregasi total di level DB — JAUH lebih efisien
+    prisma.sale.aggregate({
+      _sum: { totalAmount: true, profitAmount: true },
+      _count: { id: true },
+    }),
+
+    // Ambil data 30 hari terakhir saja untuk grafik, dengan select minimal
     prisma.sale.findMany({
-      include: {
+      where: { saleDate: { gte: thirtyDaysAgo } },
+      select: {
+        storeId: true,
+        productId: true,
+        saleDate: true,
+        totalAmount: true,
+        profitAmount: true,
+        quantitySold: true,
         store: { select: { name: true } },
         product: { select: { name: true } },
       },
-      orderBy: { saleDate: 'asc' }
-    })
+      orderBy: { saleDate: 'asc' },
+      take: 1000, // Batas aman
+    }),
   ])
 
-  let totalRevenue = 0
-  let totalProfit = 0
+  const totalRevenue = salesAgg._sum.totalAmount ?? 0
+  const totalSales = salesAgg._count.id
 
-  const formattedSales = sales.map((s: any) => {
-    totalRevenue += s.totalAmount
-    totalProfit += s.profitAmount
-    return {
-      date: s.saleDate.toISOString(),
-      revenue: s.totalAmount,
-      profit: s.profitAmount,
-      store: s.storeId,
-    }
-  })
+  const formattedSales = sales.map((s: any) => ({
+    date: s.saleDate.toISOString(),
+    revenue: s.totalAmount,
+    profit: s.profitAmount,
+    store: s.storeId,
+  }))
 
-  // Product-level breakdown data for ProductSalesBreakdown component
   const productSales = sales.map((s: any) => ({
     productId: s.productId,
     productName: s.product.name,
@@ -44,20 +64,8 @@ export default async function DashboardPage() {
     date: s.saleDate.toISOString(),
   }))
 
-  const storeList = stores.map((s: any) => ({ id: s.id, name: s.name }))
-
   return (
-    <div className="space-y-6">
-      {/* Page Title */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-heading font-bold text-gray-900 dark:text-white">
-          Selamat Datang, Admin! 👋
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-          Ringkasan kinerja bisnis Vanilla Bakery Anda.
-        </p>
-      </div>
-
+    <>
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <StatCard
@@ -68,15 +76,15 @@ export default async function DashboardPage() {
         />
         <StatCard
           title="Total Produk"
-          value={products}
+          value={productCount}
           icon={<Package className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" />}
-          bg="bg-purple-50"
+          bg="bg-purple-50 dark:bg-purple-950/20"
         />
         <StatCard
           title="Total Transaksi"
-          value={sales.length}
+          value={totalSales.toLocaleString('id-ID')}
           icon={<TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />}
-          bg="bg-green-50"
+          bg="bg-green-50 dark:bg-green-950/20"
         />
         <StatCard
           title="Total Omzet"
@@ -86,17 +94,17 @@ export default async function DashboardPage() {
               : totalRevenue.toLocaleString('id-ID')
           }`}
           icon={<CircleDollarSign className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-600" />}
-          bg="bg-yellow-50"
+          bg="bg-yellow-50 dark:bg-yellow-950/20"
         />
       </div>
 
-      {/* Product Breakdown Section */}
-      <ProductSalesBreakdown data={productSales} stores={storeList} />
+      {/* Product Breakdown */}
+      <ProductSalesBreakdown data={productSales} stores={stores} />
 
-      {/* Time-based Sales Chart */}
+      {/* Chart */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
         {stores.length > 0 ? (
-          <SalesChart data={formattedSales} stores={storeList} productSales={productSales} />
+          <SalesChart data={formattedSales} stores={stores} productSales={productSales} />
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-gray-500">
             <TrendingUp className="w-14 h-14 mb-4 opacity-30" />
@@ -109,10 +117,51 @@ export default async function DashboardPage() {
           </div>
         )}
       </div>
+    </>
+  )
+}
+
+export default async function DashboardPage() {
+  return (
+    <div className="space-y-6">
+      {/* Page Title */}
+      <div>
+        <h1 className="text-xl sm:text-2xl font-heading font-bold text-gray-900 dark:text-white">
+          Selamat Datang, Admin! 👋
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+          Ringkasan Kinerja Family Bakery — 30 hari terakhir.
+        </p>
+      </div>
+
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardData />
+      </Suspense>
     </div>
   )
 }
 
+// ── Skeleton Loading ───────────────────────────────────────────────
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      {/* KPI Cards skeleton */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 sm:p-5">
+            <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-xl mb-3" />
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2" />
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+          </div>
+        ))}
+      </div>
+      {/* Chart skeleton */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 sm:p-6 h-72" />
+    </div>
+  )
+}
+
+// ── StatCard ───────────────────────────────────────────────────────
 function StatCard({
   title,
   value,

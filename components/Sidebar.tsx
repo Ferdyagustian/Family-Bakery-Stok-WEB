@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Store as StoreIcon, FileSpreadsheet, LogOut, X } from 'lucide-react'
 import { logoutAction } from '@/lib/actions/auth'
 
@@ -7,7 +10,20 @@ interface SidebarProps {
   showCloseButton?: boolean
 }
 
+const navLinks = [
+  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/stores', label: 'Manajemen Cabang', icon: StoreIcon },
+  { href: '/reports', label: 'Laporan', icon: FileSpreadsheet },
+]
+
 export function Sidebar({ onClose, showCloseButton }: SidebarProps) {
+  const pathname = usePathname()
+
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/'
+    return pathname.startsWith(href)
+  }
+
   return (
     <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-full flex flex-col flex-shrink-0">
       {/* Header */}
@@ -31,31 +47,30 @@ export function Sidebar({ onClose, showCloseButton }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-4 mb-3">Menu Utama</p>
-        <Link
-          href="/"
-          onClick={onClose}
-          className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-primary-50 dark:bg-primary-950/20 hover:text-primary-700 transition-colors font-medium text-sm"
-        >
-          <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
-          <span>Dashboard</span>
-        </Link>
-        <Link
-          href="/stores"
-          onClick={onClose}
-          className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-primary-50 dark:bg-primary-950/20 hover:text-primary-700 transition-colors font-medium text-sm"
-        >
-          <StoreIcon className="w-5 h-5 flex-shrink-0" />
-          <span>Manajemen Cabang</span>
-        </Link>
-        <Link
-          href="/reports"
-          onClick={onClose}
-          className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-primary-50 dark:bg-primary-950/20 hover:text-primary-700 transition-colors font-medium text-sm"
-        >
-          <FileSpreadsheet className="w-5 h-5 flex-shrink-0" />
-          <span>Laporan</span>
-        </Link>
+        <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-4 mb-3">
+          Menu Utama
+        </p>
+        {navLinks.map(({ href, label, icon: Icon }) => {
+          const active = isActive(href)
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={onClose}
+              className={`flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 ${
+                active
+                  ? 'bg-primary-600 text-white shadow-md shadow-primary-200 dark:shadow-primary-900/30'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-950/20 hover:text-primary-700 dark:hover:text-primary-400'
+              }`}
+            >
+              <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-white' : ''}`} />
+              <span>{label}</span>
+              {active && (
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white opacity-80" />
+              )}
+            </Link>
+          )
+        })}
       </nav>
 
       {/* Footer: Logout */}
@@ -63,7 +78,7 @@ export function Sidebar({ onClose, showCloseButton }: SidebarProps) {
         <form action={logoutAction}>
           <button
             type="submit"
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors font-medium text-sm"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 transition-colors font-medium text-sm"
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />
             <span>Logout</span>

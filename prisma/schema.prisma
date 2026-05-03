@@ -33,12 +33,15 @@ model Product {
   description   String?
   imageUrl      String?
   price         Float
-  discount      Int      @default(0) // Discount percentage 0-100
+  discount      Int      @default(0)
   stockQuantity Int      @default(0)
   store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   sales         Sale[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([stockQuantity])
 }
 
 model Sale {
@@ -47,8 +50,13 @@ model Sale {
   productId     String
   quantitySold  Int
   totalAmount   Float
-  profitAmount  Float    // Simplified: revenue - cost of goods (could just be totalAmount if cost is 0 for simplicity, we will track total amount as profit for this dashboard unless cost is provided)
+  profitAmount  Float
   saleDate      DateTime @default(now())
   store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([saleDate])
+  @@index([storeId])
+  @@index([productId])
+  @@index([storeId, saleDate])
 }
