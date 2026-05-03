@@ -14,19 +14,23 @@ export async function loginAction(formData: FormData) {
   }
 
   try {
-    const admin = await prisma.admin.findUnique({ where: { username } })
+    const user = await prisma.user.findUnique({ where: { username } })
 
-    if (!admin) {
+    if (!user) {
       redirect('/login?error=UserNotFound')
     }
 
-    const passwordMatch = await bcrypt.compare(password, admin.passwordHash)
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash)
 
     if (!passwordMatch) {
       redirect('/login?error=WrongPassword')
     }
 
-    await createSession()
+    await createSession({
+      id: user.id,
+      role: user.role,
+      storeId: user.storeId,
+    })
   } catch (error: any) {
     if (error?.digest?.startsWith('NEXT_REDIRECT')) throw error
     console.error('Login error:', error)

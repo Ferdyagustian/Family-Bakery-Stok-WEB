@@ -8,6 +8,7 @@ import { logoutAction } from '@/lib/actions/auth'
 interface SidebarProps {
   onClose?: () => void
   showCloseButton?: boolean
+  user?: any
 }
 
 const navLinks = [
@@ -16,8 +17,15 @@ const navLinks = [
   { href: '/reports', label: 'Laporan', icon: FileSpreadsheet },
 ]
 
-export function Sidebar({ onClose, showCloseButton }: SidebarProps) {
+export function Sidebar({ onClose, showCloseButton, user }: SidebarProps) {
   const pathname = usePathname()
+
+  let visibleLinks = navLinks
+  if (user?.role === 'MANAGER') {
+    visibleLinks = [
+      { href: `/stores/${user.storeId}`, label: 'Cabang Saya', icon: StoreIcon }
+    ]
+  }
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/'
@@ -50,7 +58,7 @@ export function Sidebar({ onClose, showCloseButton }: SidebarProps) {
         <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-4 mb-3">
           Menu Utama
         </p>
-        {navLinks.map(({ href, label, icon: Icon }) => {
+        {visibleLinks.map(({ href, label, icon: Icon }) => {
           const active = isActive(href)
           return (
             <Link

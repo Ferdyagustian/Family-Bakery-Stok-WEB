@@ -17,9 +17,11 @@ type LowStockProduct = {
 export function DashboardShell({
   children,
   lowStockProducts = [],
+  user,
 }: {
   children: React.ReactNode
   lowStockProducts?: LowStockProduct[]
+  user?: { role: string, name?: string, username?: string }
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -36,7 +38,7 @@ export function DashboardShell({
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:flex-shrink-0">
-        <Sidebar onClose={() => setSidebarOpen(false)} />
+        <Sidebar onClose={() => setSidebarOpen(false)} user={user} />
       </div>
 
       {/* Mobile Sidebar */}
@@ -46,7 +48,7 @@ export function DashboardShell({
         lg:hidden
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <Sidebar onClose={() => setSidebarOpen(false)} showCloseButton />
+        <Sidebar onClose={() => setSidebarOpen(false)} showCloseButton user={user} />
       </div>
 
       {/* Main Content */}
@@ -81,12 +83,14 @@ export function DashboardShell({
             {/* 🔔 Low stock notification bell */}
             <LowStockAlert products={lowStockProducts} />
 
-            {/* Admin avatar */}
+            {/* Admin/Manager avatar */}
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-sm">
-                A
+                {user?.name?.[0]?.toUpperCase() || 'A'}
               </div>
-              <span className="hidden sm:block font-medium text-sm text-gray-700 dark:text-gray-200">Admin</span>
+              <span className="hidden sm:block font-medium text-sm text-gray-700 dark:text-gray-200">
+                {user?.role === 'MANAGER' ? 'Kasir' : 'Admin'}
+              </span>
             </div>
           </div>
         </header>

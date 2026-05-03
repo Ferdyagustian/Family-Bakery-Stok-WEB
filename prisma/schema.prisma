@@ -9,11 +9,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
+enum Role {
+  ADMIN
+  MANAGER
+}
+
+model User {
   id           String   @id @default(cuid())
   username     String   @unique
   passwordHash String
+  name         String?
+  role         Role     @default(MANAGER)
+  storeId      String?  
+  store        Store?   @relation(fields: [storeId], references: [id], onDelete: SetNull)
   createdAt    DateTime @default(now())
+
+  @@index([storeId])
 }
 
 model Store {
@@ -22,6 +33,7 @@ model Store {
   location  String?
   products  Product[]
   sales     Sale[]
+  users     User[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }

@@ -3,9 +3,14 @@ import prisma from '@/lib/db'
 import { Suspense } from 'react'
 
 // Komponen async terpisah — tidak blocking shell render
-async function LowStockLoader({ children }: { children: (data: any[]) => React.ReactNode }) {
+async function LowStockLoader({ children, user }: { children: (data: any[]) => React.ReactNode, user: any }) {
+  const whereClause: any = { stockQuantity: { lt: 7 } }
+  if (user?.role === 'MANAGER' && user?.storeId) {
+    whereClause.storeId = user.storeId
+  }
+
   const lowStockProducts = await prisma.product.findMany({
-    where: { stockQuantity: { lt: 7 } },
+    where: whereClause,
     select: {
       id: true,
       name: true,
@@ -28,16 +33,20 @@ async function LowStockLoader({ children }: { children: (data: any[]) => React.R
   return <>{children(lowStockData)}</>
 }
 
+import { getSession } from '@/lib/session'
+
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const user = await getSession()
+
   return (
-    <Suspense fallback={<DashboardShell lowStockProducts={[]}>{children}</DashboardShell>}>
-      <LowStockLoader>
+    <Suspense fallback={<DashboardShell lowStockProducts={[]} user={user?.user}>{children}</DashboardShell>}>
+      <LowStockLoader user={user?.user}>
         {(lowStockData) => (
-          <DashboardShell lowStockProducts={lowStockData}>{children}</DashboardShell>
+          <DashboardShell lowStockProducts={lowStockData} user={user?.user}>{children}</DashboardShell>
         )}
       </LowStockLoader>
     </Suspense>

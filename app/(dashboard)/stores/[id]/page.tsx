@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { ChevronLeft, Store, Package, RefreshCw } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { DeleteStoreButton } from '@/components/DeleteStoreButton'
+import { getSession } from '@/lib/session'
+import { ManageStoreUsers } from '@/components/ManageStoreUsers'
 
 export const revalidate = 30
 
@@ -14,9 +16,13 @@ export default async function StoreDetailPage({ params }: { params: Promise<{ id
   const store = await prisma.store.findUnique({
     where: { id: storeId },
     include: {
-      products: { orderBy: { createdAt: 'desc' } }
+      products: { orderBy: { createdAt: 'desc' } },
+      users: { select: { id: true, name: true, username: true } },
     }
   })
+
+  const session = await getSession()
+  const isAdmin = session?.user?.role === 'ADMIN'
 
   if (!store) notFound()
 
@@ -35,9 +41,12 @@ export default async function StoreDetailPage({ params }: { params: Promise<{ id
           <span className="truncate">{store.name}</span>
         </h1>
         <div className="ml-auto flex-shrink-0">
-          <DeleteStoreButton storeId={store.id} storeName={store.name} />
+          {isAdmin && <DeleteStoreButton storeId={store.id} storeName={store.name} />}
         </div>
       </div>
+
+      {/* Admin Panel: Manage Cashiers */}
+      {isAdmin && <ManageStoreUsers storeId={store.id} users={store.users} />}
 
       {/* Sub-header with action */}
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
