@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
+import { supabase } from "@/lib/supabase";
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
@@ -29,11 +30,37 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Convert to base64 data URI to avoid filesystem write issues
-    const base64 = buffer.toString('base64');
-    const dataUri = `data:${file.type};base64,${base64}`;
+    // Bikin nama file unik
+    const fileExtension = file.name.split('.').pop() || 'jpg';
+    const fileName = `${crypto.randomUUID()}.${fileExtension}`;
+    
+    // Upload ke Supabase Storage bucket 'products'
+    const { error: uploadError } = await supabase
+      .storage
+      .from('products')
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        upsert: false
+      });
 
-    return NextResponse.json({ success: true, url: dataUri });
+    if (uploadError) {
+      console.error("Supabase storage error:", uploadError);
+      
+      // Deteksi error jika env vars belum diset
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        return NextResponse.json({ success: false, error: "Sistem belum dikonfigurasi untuk Storage (URL/Key kosong)" }, { status: 500 });
+      }
+      
+      return NextResponse.json({ success: false, error: `Gagal mengupload ke Storage: ${uploadError.message}` }, { status: 500 });
+    }
+
+    // Dapatkan Public URL
+    const { data: publicUrlData } = supabase
+      .storage
+      .from('products')
+      .getPublicUrl(fileName);
+
+    return NextResponse.json({ success: true, url: publicUrlData.publicUrl });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ success: false, error: "Upload failed" }, { status: 500 });
