@@ -198,3 +198,75 @@ export async function bulkRestockProducts(
     return { error: 'Gagal menyimpan restok. Silakan coba lagi.' }
   }
 }
+
+// ─────────────────────────────────────────────
+// BULK SALES (POS CART CHECKOUT)
+// ─────────────────────────────────────────────
+export async function recordBulkSales(
+  items: { productId: string; quantity: number }[],
+  storeId: string
+) {
+  if (!(await getSession())) return { error: 'Unauthorized' }
+
+  const validItems = items.filter(
+    (item) => item.productId && Number.isInteger(item.quantity) && item.quantity > 0
+  )
+
+  if (validItems.length === 0) {
+    return { error: 'Keranjang kosong atau data tidak valid' }
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      for (const item of validItems) {
+        // Find product to check stock and price
+        const product = await tx.product.findUnique({
+          where: { id: item.productId }
+        })
+
+        if (!product) throw new Error(`PRODUCT_NOT_FOUND:${item.productId}`)
+
+        const discountPct = (product as any).discount || 0
+        const effectivePrice = product.price * (1 - discountPct / 100)
+        const totalAmount = effectivePrice * item.quantity
+        const profitAmount = totalAmount
+
+        // Decrement stock atomically
+        const updated = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            stockQuantity: { gte: item.quantity }
+          },
+          data: { stockQuantity: { decrement: item.quantity } }
+        })
+
+        if (updated.count === 0) {
+          throw new Error(`INSUFFICIENT_STOCK:${product.name}`)
+        }
+
+        // Record sale
+        await tx.sale.create({
+          data: {
+            storeId,
+            productId: item.productId,
+            quantitySold: item.quantity,
+            totalAmount,
+            profitAmount
+          }
+        })
+      }
+    })
+
+    revalidatePath(`/stores/${storeId}`)
+    return { success: true }
+  } catch (error: any) {
+    if (error?.message?.startsWith('PRODUCT_NOT_FOUND')) {
+      return { error: 'Ada produk yang tidak ditemukan di database' }
+    }
+    if (error?.message?.startsWith('INSUFFICIENT_STOCK')) {
+      const productName = error.message.split(':')[1]
+      return { error: `Stok tidak cukup untuk produk: ${productName}` }
+    }
+    return { error: 'Gagal memproses transaksi kasir' }
+  }
+}

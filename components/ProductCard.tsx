@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useOptimistic, useTransition } from 'react'
-import { recordSale, deleteProduct } from '@/lib/actions/product'
+import { deleteProduct } from '@/lib/actions/product'
 import { EditProductModal } from '@/components/EditProductModal'
 import { Trash2, Package, Tag, ShoppingCart, Minus, Plus, AlertTriangle, X, Percent, CheckCircle2 } from 'lucide-react'
 import Image from 'next/image'
@@ -98,7 +98,19 @@ function DeleteConfirmModal({
 }
 
 // ── Product Card ───────────────────────────────────────────────────
-export function ProductCard({ product, storeId, viewMode = 'grid' }: { product: any, storeId: string, viewMode?: 'grid' | 'list' }) {
+export function ProductCard({ 
+  product, 
+  storeId, 
+  viewMode = 'grid',
+  onAddToCart,
+  cartQty = 0
+}: { 
+  product: any, 
+  storeId: string, 
+  viewMode?: 'grid' | 'list',
+  onAddToCart?: (product: any, qty: number) => void,
+  cartQty?: number
+}) {
   const [isPending, startTransition] = useTransition()
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [saleQty, setSaleQty] = useState<number | ''>(1)
@@ -106,36 +118,24 @@ export function ProductCard({ product, storeId, viewMode = 'grid' }: { product: 
   const [saleSuccess, setSaleSuccess] = useState(false)
 
   // ── Optimistic stock update ────────────────────────────────────
-  const [optimisticStock, setOptimisticStock] = useOptimistic(
-    product.stockQuantity,
-    (current: number, sold: number) => Math.max(0, current - sold)
-  )
+  // Available stock accounts for items already in the cart
+  const availableStock = Math.max(0, product.stockQuantity - cartQty)
 
   const adjustQty = (delta: number) => {
     const current = typeof saleQty === 'number' ? saleQty : 1
-    setSaleQty(Math.max(1, Math.min(optimisticStock, current + delta)))
+    setSaleQty(Math.max(1, Math.min(availableStock, current + delta)))
   }
 
   async function handleSale() {
     const qtySold = typeof saleQty === 'number' ? saleQty : 1
-    if (qtySold <= 0 || optimisticStock === 0) return
+    if (qtySold <= 0 || availableStock === 0) return
 
-    setSaleQty(1)
-
-    startTransition(async () => {
-      // Update UI instantly (optimistic)
-      setOptimisticStock(qtySold)
-
-      const res = await recordSale(product.id, storeId, qtySold)
-      if (res?.error) {
-        // On error, revert happens automatically via useOptimistic
-        alert(res.error)
-      } else {
-        // Show success checkmark briefly
-        setSaleSuccess(true)
-        setTimeout(() => setSaleSuccess(false), 1500)
-      }
-    })
+    if (onAddToCart) {
+      onAddToCart(product, qtySold)
+      setSaleQty(1)
+      setSaleSuccess(true)
+      setTimeout(() => setSaleSuccess(false), 1000)
+    }
   }
 
   async function handleDeleteConfirmed() {
@@ -148,8 +148,8 @@ export function ProductCard({ product, storeId, viewMode = 'grid' }: { product: 
     }
   }
 
-  const isOutOfStock = optimisticStock === 0
-  const isLowStock = optimisticStock > 0 && optimisticStock < 10
+  const isOutOfStock = availableStock === 0
+  const isLowStock = availableStock > 0 && availableStock < 10
   const hasDiscount = product.discount > 0
   const discountedPrice = hasDiscount
     ? product.price * (1 - product.discount / 100)
@@ -269,7 +269,7 @@ export function ProductCard({ product, storeId, viewMode = 'grid' }: { product: 
                 ? 'bg-yellow-100 text-yellow-700'
                 : 'bg-green-100 text-green-700'
             }`}>
-              {isOutOfStock ? 'Habis' : `${optimisticStock} stok`}
+              {isOutOfStock ? 'Habis' : `${availableStock} stok`}
             </span>
           </div>
 
@@ -292,7 +292,7 @@ export function ProductCard({ product, storeId, viewMode = 'grid' }: { product: 
                   if (isNaN(val)) {
                     setSaleQty('')
                   } else {
-                    setSaleQty(Math.min(optimisticStock, val))
+                    setSaleQty(Math.min(availableStock, val))
                   }
                 }}
                 onBlur={() => {
@@ -303,7 +303,7 @@ export function ProductCard({ product, storeId, viewMode = 'grid' }: { product: 
               />
               <button
                 onClick={() => adjustQty(1)}
-                disabled={typeof saleQty === 'number' && saleQty >= optimisticStock || isPending || isOutOfStock}
+                disabled={typeof saleQty === 'number' && saleQty >= availableStock || isPending || isOutOfStock}
                 className="w-11 h-full flex items-center justify-center text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors duration-150"
               >
                 <Plus className="w-4 h-4" />
@@ -324,13 +324,13 @@ export function ProductCard({ product, storeId, viewMode = 'grid' }: { product: 
               }`}
             >
               {saleSuccess ? (
-                <><CheckCircle2 className="w-3.5 h-3.5" /> Tercatat!</>
+                <><CheckCircle2 className="w-3.5 h-3.5" /> Ditambah</>
               ) : isPending ? (
-                <><div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Mencatat...</>
+                <><div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> ...</>
               ) : isOutOfStock ? (
                 'Stok Habis'
               ) : (
-                <><ShoppingCart className="w-3.5 h-3.5" /> {viewMode === 'list' ? 'Jual' : 'Catat Jual'}</>
+                <><Plus className="w-4 h-4" /> Tambah</>
               )}
             </button>
           </div>
