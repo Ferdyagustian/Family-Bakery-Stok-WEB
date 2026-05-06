@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { ProductCard } from '@/components/ProductCard'
-import { Package, Search } from 'lucide-react'
+import { Package, Search, LayoutGrid, List } from 'lucide-react'
 
 export function ProductSearchList({ products, storeId }: { products: any[], storeId: string }) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -13,24 +14,55 @@ export function ProductSearchList({ products, storeId }: { products: any[], stor
 
   return (
     <div className="space-y-4">
-      {/* Search Bar */}
-      <div className="relative max-w-md">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-gray-400" />
+      {/* Toolbar: Search & View Toggle */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="relative w-full max-w-md">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Cari nama produk..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors shadow-sm"
+          />
         </div>
-        <input
-          type="text"
-          placeholder="Cari nama produk..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors shadow-sm"
-        />
+
+        <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-full sm:w-auto">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'grid'
+                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            <span className="sm:hidden">Grid</span>
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'list'
+                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+          >
+            <List className="w-4 h-4" />
+            <span className="sm:hidden">List</span>
+          </button>
+        </div>
       </div>
 
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+      {/* Products Grid / List */}
+      <div className={`grid gap-4 sm:gap-6 ${
+        viewMode === 'grid' 
+          ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+          : 'grid-cols-1 lg:grid-cols-2'
+      }`}>
         {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} storeId={storeId} />
+          <ProductCard key={product.id} product={product} storeId={storeId} viewMode={viewMode} />
         ))}
         {filteredProducts.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center p-10 bg-white dark:bg-gray-900 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500">

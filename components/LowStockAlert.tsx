@@ -115,14 +115,14 @@ export function LowStockAlert({ products }: { products: LowStockProduct[] }) {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{product.name}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                      📍 {product.storeName}
+                      {product.storeName}
                     </p>
                     <p className={`text-xs font-medium mt-1 ${
                       product.stockQuantity === 0 ? 'text-red-600' : 'text-amber-600'
                     }`}>
                       {product.stockQuantity === 0
-                        ? '⛔ Stok habis!'
-                        : `⚠️ Sisa ${product.stockQuantity} unit — segera restok`}
+                        ? 'Stok habis!'
+                        : `Sisa ${product.stockQuantity} unit — segera restok`}
                     </p>
                     {/* Action links */}
                     <div className="flex items-center gap-3 mt-2">

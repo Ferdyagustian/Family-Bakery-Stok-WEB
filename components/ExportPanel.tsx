@@ -204,11 +204,11 @@ export function ExportPanel({ stores }: { stores: StoreOption[] }) {
                   onChange={(e) => { setDatePreset(e.target.value); setPreviewData(null) }}
                   className="flex h-11 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none"
                 >
-                  <option value="today">📅 Hari Ini</option>
-                  <option value="7days">📅 7 Hari Terakhir</option>
-                  <option value="30days">📅 30 Hari Terakhir</option>
-                  <option value="month">📅 Bulan Ini</option>
-                  <option value="custom">📅 Custom</option>
+                  <option value="today">Hari Ini</option>
+                  <option value="7days">7 Hari Terakhir</option>
+                  <option value="30days">30 Hari Terakhir</option>
+                  <option value="month">Bulan Ini</option>
+                  <option value="custom">Custom</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
@@ -262,7 +262,7 @@ export function ExportPanel({ stores }: { stores: StoreOption[] }) {
 
         {error && (
           <div className="mt-4 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm">
-            ⚠️ {error}
+            {error}
           </div>
         )}
       </div>

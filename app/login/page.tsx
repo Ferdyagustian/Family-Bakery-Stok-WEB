@@ -35,7 +35,7 @@ export default async function LoginPage(props: { searchParams: SearchParams }) {
 
           {error && errorMessages[error] && (
             <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-              ⚠️ {errorMessages[error]}
+              {errorMessages[error]}
             </div>
           )}
 

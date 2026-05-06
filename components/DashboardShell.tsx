@@ -80,7 +80,7 @@ export function DashboardShell({
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {/* 🔔 Low stock notification bell */}
+            {/* Low stock notification bell */}
             <LowStockAlert products={lowStockProducts} />
 
             {/* Admin/Manager avatar */}

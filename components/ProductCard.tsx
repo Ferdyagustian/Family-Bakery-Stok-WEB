@@ -72,7 +72,7 @@ function DeleteConfirmModal({
             <p className="text-red-500 text-xs mt-1">Teks tidak sesuai. Ketik persis: pastikan</p>
           )}
           {isMatch && (
-            <p className="text-green-600 text-xs mt-1 font-medium">✓ Konfirmasi diterima</p>
+            <p className="text-green-600 text-xs mt-1 font-medium">Konfirmasi diterima</p>
           )}
         </div>
 
@@ -98,7 +98,7 @@ function DeleteConfirmModal({
 }
 
 // ── Product Card ───────────────────────────────────────────────────
-export function ProductCard({ product, storeId }: { product: any, storeId: string }) {
+export function ProductCard({ product, storeId, viewMode = 'grid' }: { product: any, storeId: string, viewMode?: 'grid' | 'list' }) {
   const [isPending, startTransition] = useTransition()
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [saleQty, setSaleQty] = useState<number | ''>(1)
@@ -166,11 +166,12 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
         />
       )}
 
-      <div className={`bg-white dark:bg-gray-900 rounded-xl border shadow-sm flex flex-col h-full overflow-hidden group hover:shadow-md transition-all duration-200 ${
-        isPending ? 'border-green-300 dark:border-green-700' : 'border-gray-100 dark:border-gray-800'
+      <div className={`bg-white dark:bg-gray-900 rounded-xl border flex ${viewMode === 'list' ? 'flex-col sm:flex-row items-center p-3 gap-4' : 'flex-col h-full'} overflow-hidden group hover:border-gray-300 dark:hover:border-gray-700 transition-colors duration-150 ${
+        isPending ? 'border-green-400 dark:border-green-600' : 'border-gray-200 dark:border-gray-800 shadow-sm'
       }`}>
         {/* Product Image */}
-        {product.imageUrl ? (
+        {viewMode === 'grid' && (
+          product.imageUrl ? (
           <div className="h-44 sm:h-48 bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
             <Image
               src={product.imageUrl}
@@ -206,10 +207,10 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
               </div>
             )}
           </div>
-        )}
+        ))}
 
         {/* Card Body */}
-        <div className="flex flex-col flex-1 p-4 space-y-3">
+        <div className={`flex flex-col flex-1 space-y-3 w-full ${viewMode === 'grid' ? 'p-4' : ''}`}>
           {/* Name + Actions */}
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-bold text-base text-gray-900 dark:text-white leading-tight line-clamp-2 flex-1">{product.name}</h3>
@@ -240,9 +241,10 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
             <p className="text-gray-400 dark:text-gray-500 text-xs line-clamp-2 leading-relaxed">{product.description}</p>
           )}
 
-          {/* Price & Stock */}
-          <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
-            <div className="flex items-center gap-1.5">
+          <div className={`flex ${viewMode === 'list' ? 'flex-col md:flex-row gap-3 items-start md:items-center' : 'flex-col gap-3'} mt-auto pt-2`}>
+            {/* Price & Stock */}
+            <div className={`flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 ${viewMode === 'list' ? 'w-full md:w-auto md:flex-1' : ''}`}>
+              <div className="flex items-center gap-1.5">
               <Tag className="w-3.5 h-3.5 text-primary-500 flex-shrink-0" />
               {hasDiscount ? (
                 <div className="flex flex-col">
@@ -272,14 +274,14 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
           </div>
 
           {/* Sale Controls */}
-          <div className="flex items-center gap-2 pt-1">
-            <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div className={`flex items-center gap-2 ${viewMode === 'list' ? 'w-full md:w-auto shrink-0' : 'pt-1'}`}>
+            <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden h-11 bg-gray-50 dark:bg-gray-800/50">
               <button
                 onClick={() => adjustQty(-1)}
                 disabled={typeof saleQty !== 'number' || saleQty <= 1 || isPending || isOutOfStock}
-                className="w-8 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
+                className="w-11 h-full flex items-center justify-center text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors duration-150"
               >
-                <Minus className="w-3.5 h-3.5" />
+                <Minus className="w-4 h-4" />
               </button>
               <input
                 type="text"
@@ -297,28 +299,28 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
                   if (saleQty === '' || saleQty < 1) setSaleQty(1)
                 }}
                 disabled={isPending || isOutOfStock}
-                className="w-10 text-center text-sm font-semibold text-gray-800 dark:text-gray-100 bg-transparent border-none focus:outline-none focus:ring-0 p-0"
+                className="w-10 h-full text-center text-base font-bold text-gray-900 dark:text-gray-100 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white dark:focus:bg-gray-900 p-0 transition-all"
               />
               <button
                 onClick={() => adjustQty(1)}
                 disabled={typeof saleQty === 'number' && saleQty >= optimisticStock || isPending || isOutOfStock}
-                className="w-8 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
+                className="w-11 h-full flex items-center justify-center text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors duration-150"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
               </button>
             </div>
 
             <button
               onClick={handleSale}
               disabled={isPending || isOutOfStock}
-              className={`flex-1 flex items-center justify-center gap-1.5 text-white text-xs font-semibold py-2.5 rounded-lg transition-all duration-200 ${
+              className={`flex-1 flex items-center justify-center gap-2 text-white text-sm font-bold h-11 rounded-xl transition-colors duration-150 outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-gray-900 ${
                 saleSuccess
                   ? 'bg-emerald-500'
                   : isPending
                   ? 'bg-green-500 opacity-80'
                   : isOutOfStock
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-green-600 hover:bg-green-700'
+                  ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700 active:bg-green-800'
               }`}
             >
               {saleSuccess ? (
@@ -328,12 +330,13 @@ export function ProductCard({ product, storeId }: { product: any, storeId: strin
               ) : isOutOfStock ? (
                 'Stok Habis'
               ) : (
-                <><ShoppingCart className="w-3.5 h-3.5" /> Catat Jual</>
+                <><ShoppingCart className="w-3.5 h-3.5" /> {viewMode === 'list' ? 'Jual' : 'Catat Jual'}</>
               )}
             </button>
           </div>
         </div>
       </div>
+    </div>
     </>
   )
 }

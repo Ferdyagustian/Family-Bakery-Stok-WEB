@@ -55,7 +55,7 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
     } else {
       setResult({
         type: 'success',
-        message: `✅ Berhasil merestok ${res.count} produk, total ${totalUnitsAdded} unit ditambahkan!`
+        message: `Berhasil merestok ${res.count} produk, total ${totalUnitsAdded} unit ditambahkan!`
       })
       setQuantities({}) // Reset all inputs
     }
@@ -150,10 +150,10 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
             return (
               <div
                 key={product.id}
-                className={`bg-white dark:bg-gray-900 rounded-xl border-2 shadow-sm transition-all duration-200 overflow-hidden ${
+                className={`bg-white dark:bg-gray-900 rounded-xl border flex flex-col transition-colors duration-150 overflow-hidden ${
                   hasValue
-                    ? 'border-primary-300 shadow-primary-100'
-                    : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:border-gray-700'
+                    ? 'border-primary-400 dark:border-primary-600'
+                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 shadow-sm'
                 }`}
               >
                 {/* Product image */}
@@ -186,14 +186,14 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
                         ? 'bg-yellow-100 text-yellow-700'
                         : 'bg-green-100 text-green-700'
                     }`}>
-                      {isOutOfStock ? '⚠️ Habis' : `${product.stockQuantity} unit`}
+                      {isOutOfStock ? 'Habis' : `${product.stockQuantity} unit`}
                     </span>
                   </div>
 
                   {/* Restock input */}
                   <div>
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 block">
-                      Tambah stok:
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 block">
+                      Tambah stok (+):
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -203,10 +203,10 @@ export function RestockForm({ products, storeId }: { products: Product[], storeI
                         onChange={e => updateQty(product.id, e.target.value)}
                         placeholder="0"
                         disabled={loading}
-                        className={`flex-1 h-10 rounded-lg border text-sm text-center font-semibold focus:outline-none focus:ring-2 transition-colors ${
+                        className={`flex-1 h-12 rounded-xl border-2 text-base text-center font-bold outline-none focus:ring-4 focus:ring-primary-500/20 transition-colors duration-150 ${
                           hasValue
-                            ? 'border-primary-400 bg-primary-50 dark:bg-primary-950/20 text-primary-700 focus:ring-primary-500'
-                            : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 focus:ring-primary-400'
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-800 dark:text-primary-100'
+                            : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:border-gray-300 focus:border-primary-400'
                         }`}
                       />
                       {hasValue && (

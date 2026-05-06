@@ -127,7 +127,7 @@ export default async function DashboardPage() {
       {/* Page Title */}
       <div>
         <h1 className="text-xl sm:text-2xl font-heading font-bold text-gray-900 dark:text-white">
-          Selamat Datang, Admin! 👋
+          Selamat Datang, Admin!
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
           Ringkasan Kinerja Family Bakery — 30 hari terakhir.
